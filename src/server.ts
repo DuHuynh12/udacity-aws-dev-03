@@ -27,6 +27,32 @@ import e from 'express';
   //    image_url: URL of a publicly accessible image
   // RETURNS
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
+
+  app.get('/filteredimage',async(req,res) => {
+    let image_url = req.query.image_url;
+
+    //1. validate the image_url query
+    if (image_url){
+      // 2. call filterImageFromURL(image_url) to filter the image
+      await filterImageFromURL(image_url)
+      .then((image_path) => {
+        // 3. send the resulting file in the response
+        res.status(200).sendFile(image_path,(err)=>{
+          if(err){
+            res.status(500).send('image_url processced, but something went wrong on when return back client');
+          }
+          // 4. deletes any files on the server on finish of the response
+          deleteLocalFiles([image_path]);
+        });
+      })
+      .catch((err) => { 
+        res.status(422).send('Unprocessable image_url');
+      });
+    }else{
+      res.status(400).send('image_url is required');
+    }
+  })
+
   /**************************************************************************** */
 
   
